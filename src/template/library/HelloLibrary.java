@@ -2,6 +2,9 @@ package template.library;
 
 
 import processing.core.*;
+import avn.portal.*;
+
+import java.net.URL;
 
 /**
  * This is a template class and can be used to start a new processing Library.
@@ -43,6 +46,22 @@ public class HelloLibrary {
 	
 	
 	public String sayHello() {
+		
+		String ROOM_ID = "w6QJKv9";
+		String HUB_AUTH_TOKEN = "AUTH_NOT_REQUIRED_FOR_TEST";
+
+		// Some resources about Kotlin-Java interoperability:
+        // https://kotlinlang.org/docs/java-to-kotlin-interop.html
+        // https://medium.com/google-developer-experts/from-java-to-kotlin-and-back-i-java-calling-kotlin-9abfc6496b04
+		// https://livebook.manning.com/book/the-joy-of-kotlin/a-mixing-kotlin-with-java/v-8/226
+
+		try {
+			URL HUB_SERVER = new URL("https://hubs.mozilla.com");
+			ReticulumConnection connection = new avn.portal.ReticulumConnection(HUB_SERVER, HUB_AUTH_TOKEN);
+		} catch (Exception ex) {
+			System.err.println("Hubs connection failed");
+		}
+
 		return "hello library.";
 	}
 	/**
