@@ -47,7 +47,7 @@ public class HelloLibrary {
 	
 	public String sayHello() {
 		
-		String ROOM_ID = "w6QJKv9";
+		String ROOM_ID = "V32UWm4";
 		String HUB_AUTH_TOKEN = "AUTH_NOT_REQUIRED_FOR_TEST";
 
 		// Some resources about Kotlin-Java interoperability:
@@ -57,10 +57,25 @@ public class HelloLibrary {
 
 		try {
 			URL HUB_SERVER = new URL("https://hubs.mozilla.com");
-			ReticulumConnection connection = new avn.portal.ReticulumConnection(HUB_SERVER, HUB_AUTH_TOKEN);
+			avn.portal.ReticulumConnection connection = new avn.portal.ReticulumConnection(HUB_SERVER, HUB_AUTH_TOKEN);
+			avn.portal.RoomConnection room = new avn.portal.RoomConnection(ROOM_ID, connection, "hubs-connect");
+			
+
+			if (room.isOpen()) {
+				System.out.println("SUCCESS to open room");
+			}
+
+			Thread.sleep(1000);
+
+			room.close();
+
+			System.out.println("SUCCESS to close room");
+			
 		} catch (Exception ex) {
 			System.err.println("Hubs connection failed");
+			ex.printStackTrace();
 		}
+
 
 		return "hello library.";
 	}

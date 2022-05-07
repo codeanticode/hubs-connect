@@ -1,6 +1,7 @@
 import template.library.*;
 
 HelloLibrary hello;
+String msg;
 
 void setup() {
   size(400,400);
@@ -8,12 +9,13 @@ void setup() {
   
   hello = new HelloLibrary(this);
   
-  PFont font = createFont("",40);
+  PFont font = createFont("Arial",40);
   textFont(font);
+  msg = hello.sayHello();
 }
 
 void draw() {
   background(0);
   fill(255);
-  text(hello.sayHello(), 40, 200);
+  text(msg, 40, 200);
 }
