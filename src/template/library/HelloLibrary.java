@@ -26,6 +26,8 @@ public class HelloLibrary {
 	
 	public final static String VERSION = "##library.prettyVersion##";
 	
+	avn.portal.ReticulumConnection connection;
+	avn.portal.RoomConnection room;
 
 	/**
 	 * a Constructor, usually called in the setup() method in your sketch to
@@ -46,10 +48,10 @@ public class HelloLibrary {
 	
 	
 	public String sayHello() {
-		
-		String ROOM_ID = "V32UWm4";
-		String HUB_AUTH_TOKEN = "AUTH_NOT_REQUIRED_FOR_TEST";
+		return "hello library.";
+	}
 
+    public boolean open(String userName, String roomId, String authToken) {
 		// Some resources about Kotlin-Java interoperability:
         // https://kotlinlang.org/docs/java-to-kotlin-interop.html
         // https://medium.com/google-developer-experts/from-java-to-kotlin-and-back-i-java-calling-kotlin-9abfc6496b04
@@ -57,28 +59,32 @@ public class HelloLibrary {
 
 		try {
 			URL HUB_SERVER = new URL("https://hubs.mozilla.com");
-			avn.portal.ReticulumConnection connection = new avn.portal.ReticulumConnection(HUB_SERVER, HUB_AUTH_TOKEN);
-			avn.portal.RoomConnection room = new avn.portal.RoomConnection(ROOM_ID, connection, "hubs-connect");
-			
 
+			connection = new avn.portal.ReticulumConnection(HUB_SERVER, authToken);
+			room = new avn.portal.RoomConnection(roomId, connection, userName);
+			
 			if (room.isOpen()) {
 				System.out.println("SUCCESS to open room");
 			}
 
-			Thread.sleep(1000);
-
-			room.close();
-
-			System.out.println("SUCCESS to close room");
-			
+			return true;
 		} catch (Exception ex) {
 			System.err.println("Hubs connection failed");
 			ex.printStackTrace();
 		}
-
-
-		return "hello library.";
+		return false;
 	}
+
+	public void close() {
+		try {
+			room.close();
+			System.out.println("SUCCESS to close room");			
+		} catch (Exception ex) {
+			System.err.println("Hubs connection failed");
+			ex.printStackTrace();
+		}
+	}
+
 	/**
 	 * return the version of the Library.
 	 * 
