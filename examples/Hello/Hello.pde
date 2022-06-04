@@ -3,6 +3,8 @@ import template.library.*;
 HelloLibrary hello;
 String msg;
 
+boolean connected = false;
+
 void setup() {
   size(400,400);
   smooth();
@@ -17,5 +19,13 @@ void setup() {
 void draw() {
   background(0);
   fill(255);
-  text(msg, 40, 200);
+  text("Connected: " + connected, 40, 200);
+}
+
+void keyPressed() {
+  if (!connected) {
+    connected = hello.open("hubs-connect", "V32UWm4", "AUTH_NOT_REQUIRED_FOR_TEST");
+  } else {
+    hello.close();
+  }
 }
