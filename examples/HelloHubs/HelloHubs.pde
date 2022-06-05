@@ -1,19 +1,16 @@
-import template.library.*;
+import codeanticode.hubs.*;
 
-HelloLibrary hello;
-String msg;
+HubsConnect hubs;
 
 boolean connected = false;
 
 void setup() {
   size(400,400);
-  smooth();
   
-  hello = new HelloLibrary(this);
+  hubs = new HubsConnect(this);
   
-  PFont font = createFont("Arial",40);
+  PFont font = createFont("Arial", 40);
   textFont(font);
-  msg = hello.sayHello();
 }
 
 void draw() {
