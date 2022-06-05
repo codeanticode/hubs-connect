@@ -24,8 +24,13 @@ void draw() {
 
 void keyPressed() {
   if (!connected) {
-    connected = hello.open("hubs-connect", "V32UWm4", "AUTH_NOT_REQUIRED_FOR_TEST");
+    // In order to connect to an existing Hubs room, you need the room ID, which you can get from the URL:
+    // https://hubs.mozilla.com/<ROOM_ID>
+    // and the authenticationt token, which is included in the "Your Hubs Sign-In Link" email from Hubs. This email contains a line like this:
+    // https://hubs.mozilla.com/?auth_origin=spoke&auth_payload=<...>&auth_token=<AUTHENTICATION_TOKEN>&auth_topic=<...>
+    connected = hello.open("processing-coder", "<ROOM_ID>", "<AUTHENTICATION_TOKEN>");
   } else {
     hello.close();
+    connected = false;
   }
 }
