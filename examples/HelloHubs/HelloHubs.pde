@@ -5,7 +5,7 @@ HubsConnect hubs;
 boolean connected = false;
 
 void setup() {
-  size(400,400);
+  size(400, 400);
   
   hubs = new HubsConnect(this);
   

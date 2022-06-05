@@ -112,13 +112,23 @@ public class HubsConnect {
      * @return boolean
      */
     public boolean setScene(String sceneUrl) {
+        URL url;
         try {
-            avn.portal.HubsApi.sendMessage(HUBS_SERVER, authToken, roomId, "update_scene", Map.ofEntries(entry("url", sceneUrl)), userName);
+           url = new URL(sceneUrl);
+        } catch (Exception ex) {
+            System.err.println("URL creation failed");
+            ex.printStackTrace();
+            return false;
+        }
+
+        try {
+            avn.portal.HubsApi.sendMessage(HUBS_SERVER, authToken, roomId, "update_scene", Map.ofEntries(entry("url", url)), userName);
             return true;
         } catch (Exception ex) {
             System.err.println("Hubs connection failed");
             ex.printStackTrace();
         }
+
         return false;
     }
 
