@@ -35,6 +35,9 @@ public class HubsConnect {
     private String roomId;
     private String authToken;
 
+    private String avatarId = "7qt89yB"; // Foxr avatar
+	// private String avatarId = "PGnvD5h"; // Webcam astronaut avatar
+
     /**
      * The constructor of the library object.
      * 
@@ -102,6 +105,25 @@ public class HubsConnect {
             ex.printStackTrace();
         }
     }
+
+    /**
+     * Enter the currently open room and return true if succesful.
+     * 
+     * @return boolean
+     */	
+    public boolean enter() {
+        try {
+            room.sendMessage("events:entered", Map.ofEntries());
+			room.sendMessage("events:profile_updated", Map.ofEntries(entry("profile", 
+			                                                                  Map.ofEntries(entry("avatarId", avatarId),
+																			                entry("displayName", userName)))));
+			return true;
+        } catch (Exception ex) {
+            System.err.println("Hubs connection failed");
+            ex.printStackTrace();
+        }
+		return false;
+	}
 
     /**
      * Set the scene in the currently open room and return true if succesful.

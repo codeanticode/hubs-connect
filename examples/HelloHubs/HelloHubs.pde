@@ -19,13 +19,14 @@ void draw() {
   text("Connected: " + connected, 40, 200);
 }
 
-void keyPressed() {
+void mousePressed() {
   if (!connected) {
     // In order to connect to an existing Hubs room, you need the room ID, which you can get from the URL:
     // https://hubs.mozilla.com/<ROOM_ID>
     // and the authenticationt token, which is included in the "Your Hubs Sign-In Link" email from Hubs. This email contains a line like this:
     // https://hubs.mozilla.com/?auth_origin=spoke&auth_payload=<...>&auth_token=<AUTHENTICATION_TOKEN>&auth_topic=<...>
     connected = hubs.open("processing-coder", "<ROOM_ID>", "<AUTHENTICATION_TOKEN>");
+    hubs.enter();
   } else {
     hubs.close();
     connected = false;
