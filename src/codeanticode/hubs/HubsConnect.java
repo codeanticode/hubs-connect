@@ -122,7 +122,8 @@ public class HubsConnect {
         }
 
         try {
-            avn.portal.HubsApi.sendMessage(HUBS_SERVER, authToken, roomId, "update_scene", Map.ofEntries(entry("url", url)), userName);
+            // avn.portal.HubsApi.sendMessage(HUBS_SERVER, authToken, roomId, "update_scene", Map.ofEntries(entry("url", url)), userName);
+			room.sendMessage("update_scene", Map.ofEntries(entry("url", url)));
             return true;
         } catch (Exception ex) {
             System.err.println("Hubs connection failed");
