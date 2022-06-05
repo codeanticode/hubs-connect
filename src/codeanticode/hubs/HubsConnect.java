@@ -114,9 +114,32 @@ public class HubsConnect {
     public boolean enter() {
         try {
             room.sendMessage("events:entered", Map.ofEntries());
-			room.sendMessage("events:profile_updated", Map.ofEntries(entry("profile", 
-			                                                                  Map.ofEntries(entry("avatarId", avatarId),
-																			                entry("displayName", userName)))));
+
+			// Initialize avatar (?)
+			// Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			//                                entry("1", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			// 							   entry("2", Map.ofEntries(entry("x", 0), entry("y", 1), entry("z", 1))),
+			// 							   entry("3", Map.ofEntries(entry("avatarSrc", ""), entry("avatarType", "skinnable"), entry("muted", false), entry("isSharingAvatarCamera", false))),
+			//                                entry("4", Map.ofEntries(entry("left_hand_pose", 0), entry("right_hand_pose", 0))),
+			// 							   entry("5", Map.ofEntries(entry("x", 0), entry("y", 1.6), entry("z", 0))),
+			// 							   entry("6", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			//                                entry("7", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			// 							   entry("8", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			// 							   entry("9", false),
+			//                                entry("10", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			// 							   entry("11", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			// 							   entry("12", false));
+
+            // Map data = Map.ofEntries(entry("template", "#remote-avatar"),
+			//                          entry("persistent", false),
+			//                          entry("isFirstSync", true),
+			//                          entry("components", components));
+
+			// room.sendMessage("naf", Map.ofEntries(entry("dataType", "u"), 
+			//                                       entry("data", data)));
+
+            Map profile = Map.ofEntries(entry("avatarId", avatarId), entry("displayName", userName));
+			room.sendMessage("events:profile_updated", Map.ofEntries(entry("profile", profile)));
 			return true;
         } catch (Exception ex) {
             System.err.println("Hubs connection failed");
