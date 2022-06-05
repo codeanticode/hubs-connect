@@ -25,9 +25,9 @@ void keyPressed() {
     // https://hubs.mozilla.com/<ROOM_ID>
     // and the authenticationt token, which is included in the "Your Hubs Sign-In Link" email from Hubs. This email contains a line like this:
     // https://hubs.mozilla.com/?auth_origin=spoke&auth_payload=<...>&auth_token=<AUTHENTICATION_TOKEN>&auth_topic=<...>
-    connected = hello.open("processing-coder", "<ROOM_ID>", "<AUTHENTICATION_TOKEN>");
+    connected = hubs.open("processing-coder", "<ROOM_ID>", "<AUTHENTICATION_TOKEN>");
   } else {
-    hello.close();
+    hubs.close();
     connected = false;
   }
 }
