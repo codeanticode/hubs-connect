@@ -29,6 +29,10 @@ void keyPressed() {
       connected = false;
     }
   } else if (connected) {
-    hubs.setScene(sceneURL);
+    println("Setting new scene...");
+    boolean res = hubs.setScene(sceneURL);
+    if (res) {
+      println("Success!");
+    }
   }
 }
