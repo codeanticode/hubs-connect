@@ -3,6 +3,8 @@ package codeanticode.hubs;
 import java.util.Map;
 import static java.util.Map.entry;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import processing.core.*;
 import avn.portal.*;
@@ -34,8 +36,14 @@ public class HubsConnect {
     private String userName;
     private String roomId;
     private String authToken;
+    
+    private String avatarId = "xZYtcDf";   // Default avatar
+    private String avatarUrl = "https://hubs.mozilla.com/api/v1/avatars/xZYtcDf/avatar.gltf?v=63736240049";
+    private boolean firstAvatarSync;
 
-    private String avatarId = "7qt89yB"; // Foxr avatar
+    private Timer timer;
+
+    // private String avatarId = "7qt89yB"; // Foxr avatar
 	// private String avatarId = "PGnvD5h"; // Webcam astronaut avatar
 
     /**
@@ -98,6 +106,9 @@ public class HubsConnect {
      */
     public void close() {
         try {
+            if (timer != null) {
+                timer.cancel();
+            }
             room.close();
             System.out.println("SUCCESS to close room");			
         } catch (Exception ex) {
@@ -113,33 +124,26 @@ public class HubsConnect {
      */	
     public boolean enter() {
         try {
-            room.sendMessage("events:entered", Map.ofEntries());
-
-			// Initialize avatar (?)
-			// Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
-			//                                entry("1", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
-			// 							   entry("2", Map.ofEntries(entry("x", 0), entry("y", 1), entry("z", 1))),
-			// 							   entry("3", Map.ofEntries(entry("avatarSrc", ""), entry("avatarType", "skinnable"), entry("muted", false), entry("isSharingAvatarCamera", false))),
-			//                                entry("4", Map.ofEntries(entry("left_hand_pose", 0), entry("right_hand_pose", 0))),
-			// 							   entry("5", Map.ofEntries(entry("x", 0), entry("y", 1.6), entry("z", 0))),
-			// 							   entry("6", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
-			//                                entry("7", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
-			// 							   entry("8", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
-			// 							   entry("9", false),
-			//                                entry("10", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
-			// 							   entry("11", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
-			// 							   entry("12", false));
-
-            // Map data = Map.ofEntries(entry("template", "#remote-avatar"),
-			//                          entry("persistent", false),
-			//                          entry("isFirstSync", true),
-			//                          entry("components", components));
-
-			// room.sendMessage("naf", Map.ofEntries(entry("dataType", "u"), 
-			//                                       entry("data", data)));
-
+            room.sendMessage("events:entered", Map.ofEntries(entry("entryDisplayType", "Screen"), entry("userAgent", "Processing 4 (hubs-connect library)")));
+            
             Map profile = Map.ofEntries(entry("avatarId", avatarId), entry("displayName", userName));
 			room.sendMessage("events:profile_updated", Map.ofEntries(entry("profile", profile)));
+
+            firstAvatarSync = true;
+
+            System.out.println("SUCCESS to join room");
+
+
+            TimerTask task = new TimerTask() {
+                public void run() {
+                    updateAvatar();
+                }
+            };
+            timer = new Timer("Timer");
+            long delay = 500L;
+            long period = 5000L;
+            timer.scheduleAtFixedRate(task, delay, period);
+
 			return true;
         } catch (Exception ex) {
             System.err.println("Hubs connection failed");
@@ -147,6 +151,57 @@ public class HubsConnect {
         }
 		return false;
 	}
+
+
+    private void updateAvatar() {
+        try {
+			// Initialize/update avatar
+			Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", -2))),
+			                               entry("1", Map.ofEntries(entry("x", 0), entry("y", 180), entry("z", 0))),
+										   entry("2", Map.ofEntries(entry("x", 1), entry("y", 1), entry("z", 1))),
+										   entry("3", Map.ofEntries(entry("avatarSrc", avatarUrl), 
+                                                                       entry("avatarType", "skinnable"), 
+                                                                       entry("muted", true), 
+                                                                       entry(   "isSharingAvatarCamera", false))),
+			                               entry("4", Map.ofEntries(entry("left_hand_pose", 0), entry("right_hand_pose", 0))),
+										   entry("5", Map.ofEntries(entry("x", 0), entry("y", 1.6), entry("z", 0))),
+										   entry("6", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+			                               entry("7", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+										   entry("8", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+										   entry("9", false),
+			                               entry("10", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+										   entry("11", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
+										   entry("12", false));
+
+            Map data = Map.ofEntries(entry("template", "#remote-avatar"),
+			                         entry("persistent", false),
+			                         entry("isFirstSync", firstAvatarSync),
+			                         entry("components", components));            
+
+			room.sendMessage("naf", Map.ofEntries(entry("dataType", "u"), 
+			                                      entry("data", data)));
+
+            // firstAvatarSync = false;
+
+            System.out.println("SUCCESS to update avatar");
+        } catch (Exception ex) {
+            System.err.println("Hubs connection failed");
+            ex.printStackTrace();
+        }
+    }
+
+    public boolean placeObject(int id) {
+        try {
+            room.sendMessage("events:object_spawned", Map.ofEntries(entry("object_type", id)));
+            System.out.println("SUCCESS to place object");
+			return true;
+        } catch (Exception ex) {
+            System.err.println("Hubs connection failed");
+            ex.printStackTrace();
+        }
+		return false;
+	}
+    
 
     /**
      * Set the scene in the currently open room and return true if succesful.
