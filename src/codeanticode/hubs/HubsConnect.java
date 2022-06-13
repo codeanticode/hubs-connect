@@ -5,6 +5,7 @@ import static java.util.Map.entry;
 import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Random;
 
 import processing.core.*;
 import avn.portal.*;
@@ -36,10 +37,15 @@ public class HubsConnect {
     private String userName;
     private String roomId;
     private String authToken;
-    
+
+    // private String networkId;
+    private String sessionId;
+
     private String avatarId = "xZYtcDf";   // Default avatar
     private String avatarUrl = "https://hubs.mozilla.com/api/v1/avatars/xZYtcDf/avatar.gltf?v=63736240049";
     private boolean firstAvatarSync;
+
+    private String objectId;
 
     private Timer timer;
 
@@ -87,8 +93,10 @@ public class HubsConnect {
             connection = new avn.portal.ReticulumConnection(HUBS_SERVER, authToken);
             room = new avn.portal.RoomConnection(roomId, connection, userName);
 
+            sessionId = room.getSessionId();
+
             if (room.isOpen()) {
-                System.out.println("SUCCESS to open room");
+                System.out.println("SUCCESS to open room with session id " + sessionId);
             }
 
             return true;
@@ -126,6 +134,8 @@ public class HubsConnect {
         try {
             room.sendMessage("events:entered", Map.ofEntries(entry("entryDisplayType", "Screen"), entry("userAgent", "Processing 4 (hubs-connect library)")));
             
+            avatarId = generateRandomAlphaNumericString(7);
+
             Map profile = Map.ofEntries(entry("avatarId", avatarId), entry("displayName", userName));
 			room.sendMessage("events:profile_updated", Map.ofEntries(entry("profile", profile)));
 
@@ -152,6 +162,20 @@ public class HubsConnect {
 		return false;
 	}
 
+    private String generateRandomAlphaNumericString(int len) {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        Random random = new Random();
+    
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+          .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+          .limit(len)
+          .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+          .toString();
+
+        return generatedString;
+    }
+
 
     private void updateAvatar() {
         try {
@@ -173,10 +197,14 @@ public class HubsConnect {
 										   entry("11", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", 0))),
 										   entry("12", false));
 
-            Map data = Map.ofEntries(entry("template", "#remote-avatar"),
+            Map data = Map.ofEntries(
+                                     entry("networkId", avatarId),
+                                     entry("owner", sessionId),
+                                     entry("creator", sessionId),
+                                     entry("template", "#remote-avatar"),
 			                         entry("persistent", false),
 			                         entry("isFirstSync", firstAvatarSync),
-			                         entry("components", components));            
+			                         entry("components", components));
 
 			room.sendMessage("naf", Map.ofEntries(entry("dataType", "u"), 
 			                                      entry("data", data)));
@@ -190,9 +218,38 @@ public class HubsConnect {
         }
     }
 
-    public boolean placeObject(int id) {
+    // https://sketchfab.com/models/6511da7be4714b7a896f25ee51bf54e8
+    public boolean placeObject(String assetUrl) {
         try {
-            room.sendMessage("events:object_spawned", Map.ofEntries(entry("object_type", id)));
+            room.sendMessage("events:object_spawned", Map.ofEntries(entry("object_type", 2)));
+            objectId = generateRandomAlphaNumericString(7);
+
+			// Initialize/update asset
+			Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", 0), entry("y", 1), entry("z", -1))),
+			                               entry("1", Map.ofEntries(entry("x", -15), entry("y", -16), entry("z", 0))),
+										   entry("2", Map.ofEntries(entry("x", 1), entry("y", 1), entry("z", 1))),
+										   entry("3", Map.ofEntries(entry("src", assetUrl), 
+                                                                       entry("moveTheParentNotTheMesh", false), 
+                                                                       entry("fitToBox", true), 
+                                                                       entry("resolve", true),
+                                                                       entry("animate", true),
+                                                                       entry("version", 1),
+                                                                       entry("fileIsOwned", true),
+                                                                       entry("playSoundEffect", true),
+                                                                       entry("fileId", ""))));
+
+            Map data = Map.ofEntries(
+                                     entry("networkId", objectId),
+                                     entry("owner", sessionId),
+                                     entry("creator", sessionId),
+                                     entry("template", "#interactable-media"),
+			                         entry("persistent", false),
+			                         entry("isFirstSync", true),
+			                         entry("components", components));
+
+			room.sendMessage("naf", Map.ofEntries(entry("dataType", "u"), 
+			                                      entry("data", data)));
+
             System.out.println("SUCCESS to place object");
 			return true;
         } catch (Exception ex) {
