@@ -44,8 +44,9 @@ public class HubsConnect {
     private String avatarId = "xZYtcDf";   // Default avatar
     private String avatarUrl = "https://hubs.mozilla.com/api/v1/avatars/xZYtcDf/avatar.gltf?v=63736240049";
     private boolean firstAvatarSync;
-
-    private String objectId;
+    private float avatarX;
+    private float avatarY; 
+    private float avatarZ;
 
     private Timer timer;
 
@@ -130,7 +131,7 @@ public class HubsConnect {
      * 
      * @return boolean
      */	
-    public boolean enter() {
+    public boolean enter(float x, float y, float z) {
         try {
             room.sendMessage("events:entered", Map.ofEntries(entry("entryDisplayType", "Screen"), entry("userAgent", "Processing 4 (hubs-connect library)")));
             
@@ -140,6 +141,10 @@ public class HubsConnect {
 			room.sendMessage("events:profile_updated", Map.ofEntries(entry("profile", profile)));
 
             firstAvatarSync = true;
+
+            avatarX = x;
+            avatarY = y;
+            avatarZ = z;
 
             System.out.println("SUCCESS to join room");
 
@@ -180,7 +185,7 @@ public class HubsConnect {
     private void updateAvatar() {
         try {
 			// Initialize/update avatar
-			Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", 0), entry("y", 0), entry("z", -2))),
+			Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", avatarX), entry("y", avatarY), entry("z", avatarZ))),
 			                               entry("1", Map.ofEntries(entry("x", 0), entry("y", 180), entry("z", 0))),
 										   entry("2", Map.ofEntries(entry("x", 1), entry("y", 1), entry("z", 1))),
 										   entry("3", Map.ofEntries(entry("avatarSrc", avatarUrl), 
@@ -219,14 +224,14 @@ public class HubsConnect {
     }
 
     // https://sketchfab.com/models/6511da7be4714b7a896f25ee51bf54e8
-    public boolean placeObject(String assetUrl) {
+    public String createObject(String assetUrl, float x, float y, float z) {
         try {
             room.sendMessage("events:object_spawned", Map.ofEntries(entry("object_type", 2)));
-            objectId = generateRandomAlphaNumericString(7);
+            String objectId = generateRandomAlphaNumericString(7);
 
 			// Initialize/update asset
-			Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", 0), entry("y", 1), entry("z", -1))),
-			                               entry("1", Map.ofEntries(entry("x", -15), entry("y", -16), entry("z", 0))),
+			Map components = Map.ofEntries(entry("0", Map.ofEntries(entry("x", x), entry("y", y), entry("z", z))),
+			                               entry("1", Map.ofEntries(entry("x", 0), entry("y", 180), entry("z", 0))),
 										   entry("2", Map.ofEntries(entry("x", 1), entry("y", 1), entry("z", 1))),
 										   entry("3", Map.ofEntries(entry("src", assetUrl), 
                                                                        entry("moveTheParentNotTheMesh", false), 
@@ -250,15 +255,34 @@ public class HubsConnect {
 			room.sendMessage("naf", Map.ofEntries(entry("dataType", "u"), 
 			                                      entry("data", data)));
 
-            System.out.println("SUCCESS to place object");
-			return true;
+            System.out.println("SUCCESS to create object");
+
+			return objectId;
         } catch (Exception ex) {
             System.err.println("Hubs connection failed");
             ex.printStackTrace();
         }
-		return false;
+		return null;
 	}
     
+    public boolean moveObject(String id, float x, float y, float z) {
+        try {
+            String nafValue = createNAFString(id, sessionId, sessionId, "#interactable-media", x, y, z, 0, 180, 0);
+			room.sendMessage("nafr", Map.ofEntries(entry("naf", nafValue)));
+
+            System.out.println("SUCCESS to move object");
+
+            return true;
+        } catch (Exception ex) {
+            System.err.println("Hubs connection failed");
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    private String createNAFString(String networkId, String owner, String creator, String template, float x, float y, float z, float ax, float ay, float az) {
+        return "{\"dataType\":\"um\",\"data\":{\"d\":[{\"networkId\":\"" + networkId + "\",\"owner\":\"" + owner + "\",\"creator\":\"" + creator + "\",\"lastOwnerTime\":1655201191717.35,\"template\":\"" + template + "\",\"persistent\":false,\"parent\":null,\"components\":{\"0\":{\"x\":" + x + ",\"y\":" + y + ",\"z\":" + z + "},\"1\":{\"x\":" + ax + ",\"y\":" + ay + ",\"z\":" + az + "}}}]}}";
+    }
 
     /**
      * Set the scene in the currently open room and return true if succesful.
